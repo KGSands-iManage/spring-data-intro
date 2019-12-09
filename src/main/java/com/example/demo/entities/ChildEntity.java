@@ -9,11 +9,11 @@ import javax.persistence.ManyToOne;
 public class ChildEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
-    String name;
+    private String name;
 
     @ManyToOne(optional = false)
-    public ParentEntity parent;
+    public Location parent;
 
 }
