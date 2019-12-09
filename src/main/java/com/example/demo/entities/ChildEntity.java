@@ -14,6 +14,6 @@ public class ChildEntity {
     private String name;
 
     @ManyToOne(optional = false)
-    public Location parent;
+    private Location parent;
 
 }
