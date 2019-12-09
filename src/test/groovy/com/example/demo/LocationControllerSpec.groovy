@@ -71,21 +71,6 @@ class LocationControllerSpec extends Specification {
             }
     }
 
-    def "Delete by ID"() {
-        given: "an element is added"
-            def e1 = locationRepository.save(l1)
-        and:
-            def t1 = locationRepository.findById(e1.id)
-            t1.isPresent()
-            t1.get().getCountry() == l1.country
-        when: "controller is called with an id"
-            locationController.deleteLocation(e1.id)
-        then:
-            def result = locationRepository.findById(e1.id)
-            !result.isPresent()
-    }
-
-
     def "Get by ID - REST"() {
         given: "an entity"
             def e1 = locationRepository.save(new Location()) //.save() is crudRepositroy, which is a parent of the ExampleController.
@@ -155,6 +140,20 @@ class LocationControllerSpec extends Specification {
             json.content[0].country == e2.country
     }
 
+    def "Delete by ID"() {
+        given: "an element is added"
+        def e1 = locationRepository.save(l1)
+        and:
+        def t1 = locationRepository.findById(e1.id)
+        t1.isPresent()
+        t1.get().getCountry() == l1.country
+        when: "controller is called with an id"
+        locationController.deleteLocation(e1.id)
+        then:
+        def result = locationRepository.findById(e1.id)
+        !result.isPresent()
+    }
+
     def "Delete by ID - REST"() {
         given: "the ID is present"
             def e1 = locationRepository.save(l1)
@@ -166,5 +165,11 @@ class LocationControllerSpec extends Specification {
             .andExpect(MockMvcResultMatchers.status().isOk())
             def result2 = mockMvc.perform(get("/api/locations/$e1.id")).andReturn().response.contentAsString
             result2 == null
+    }
+
+    def "Delete by ID - Null"() {
+       expect: "null entry to return 418"
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/locations/1"))
+                .andExpect(MockMvcResultMatchers.status().isIAmATeapot())
     }
 }
