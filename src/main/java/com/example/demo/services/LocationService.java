@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class LocationService {
 
@@ -21,7 +23,6 @@ public class LocationService {
         return locationRepository.findAll(pageable);
     }
 
-
     public Location findLocationById(Long id) {
         return locationRepository.findById(id).orElse(null);
     }
@@ -29,4 +30,9 @@ public class LocationService {
     public void deleteLocation(long id){
         locationRepository.deleteById(id);
     }
+
+    public List<Location> findAll() {
+        return locationRepository.findAll();
+    }
+
 }

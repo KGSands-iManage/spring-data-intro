@@ -166,4 +166,10 @@ class CustomerControllerSpec extends Specification{
         result2 == null
     }
 
+    def "Delete by ID - Null"() {
+        expect: "null entry to return 418"
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/locations/1"))
+                .andExpect(MockMvcResultMatchers.status().isIAmATeapot())
+    }
+
 }

@@ -19,6 +19,6 @@ public class Customer {
         return name;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parent", fetch = FetchType.EAGER)
-    Set<ChildEntity> children;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parent", fetch = FetchType.EAGER)
+//    Set<Car.java> children;
 }
