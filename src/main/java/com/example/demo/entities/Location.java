@@ -1,9 +1,17 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.Set;
 
 @javax.persistence.Entity
+//@NamedEntityGraph(
+//        name = "Location",
+//        attributeNodes = {
+//                @NamedAttributeNode("id"),
+//                @NamedAttributeNode("country")
+//        })
 public class Location {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -27,6 +35,11 @@ public class Location {
         this.country = country;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parent", fetch = FetchType.EAGER)
-    Set<ChildEntity> children;
+    public Set<Car> getCars() {
+        return cars;
+    }
+
+    @JsonManagedReference(value = "location")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    Set<Car> cars;
 }

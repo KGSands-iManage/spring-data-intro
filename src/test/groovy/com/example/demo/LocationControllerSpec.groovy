@@ -5,15 +5,11 @@ import com.example.demo.entities.Location
 import com.example.demo.repositories.LocationRepository
 import com.example.demo.services.LocationService
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.sun.org.apache.bcel.internal.generic.IAND
 import groovy.json.JsonSlurper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
@@ -22,8 +18,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import spock.lang.Specification
-
-import javax.swing.text.html.Option
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
@@ -70,21 +64,6 @@ class LocationControllerSpec extends Specification {
                 println("-----------------------------------------\nTesting\n" + i.id)
             }
     }
-
-    def "Delete by ID"() {
-        given: "an element is added"
-            def e1 = locationRepository.save(l1)
-        and:
-            def t1 = locationRepository.findById(e1.id)
-            t1.isPresent()
-            t1.get().getCountry() == l1.country
-        when: "controller is called with an id"
-            locationController.deleteLocation(e1.id)
-        then:
-            def result = locationRepository.findById(e1.id)
-            !result.isPresent()
-    }
-
 
     def "Get by ID - REST"() {
         given: "an entity"
@@ -155,6 +134,20 @@ class LocationControllerSpec extends Specification {
             json.content[0].country == e2.country
     }
 
+    def "Delete by ID"() {
+        given: "an element is added"
+        def e1 = locationRepository.save(l1)
+        and:
+        def t1 = locationRepository.findById(e1.id)
+        t1.isPresent()
+        t1.get().getCountry() == l1.country
+        when: "controller is called with an id"
+        locationController.deleteLocation(e1.id)
+        then:
+        def result = locationRepository.findById(e1.id)
+        !result.isPresent()
+    }
+
     def "Delete by ID - REST"() {
         given: "the ID is present"
             def e1 = locationRepository.save(l1)
@@ -167,4 +160,23 @@ class LocationControllerSpec extends Specification {
             def result2 = mockMvc.perform(get("/api/locations/$e1.id")).andReturn().response.contentAsString
             result2 == null
     }
+
+    def "Delete by ID - Null"() {
+       expect: "null entry to return 418"
+            mockMvc.perform(MockMvcRequestBuilders.delete("/api/locations/1"))
+                .andExpect(MockMvcResultMatchers.status().isIAmATeapot())
+    }
+
+    def "Summary of locations - REST"() {
+        given: "multiple locations are added"
+            def e1 = locationRepository.save(l1)
+            def e2 = locationRepository.save(l2)
+        when: "a get request is called"
+            def result = mockMvc.perform(get("/api/locations/list/summary")).andReturn().response.contentAsString
+            def json = new JsonSlurper().parseText(result)
+        then: "A list of countries are returned"
+            json[0] == l1.country
+            json[1] == l2.country
+    }
+
 }
