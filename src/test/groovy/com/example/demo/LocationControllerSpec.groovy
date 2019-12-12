@@ -20,7 +20,6 @@ import org.springframework.web.context.WebApplicationContext
 import spock.lang.Specification
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 
 @ContextConfiguration
 @SpringBootTest(classes = DemoApplication.class)
@@ -136,16 +135,16 @@ class LocationControllerSpec extends Specification {
 
     def "Delete by ID"() {
         given: "an element is added"
-        def e1 = locationRepository.save(l1)
+            def e1 = locationRepository.save(l1)
         and:
-        def t1 = locationRepository.findById(e1.id)
-        t1.isPresent()
-        t1.get().getCountry() == l1.country
+            def t1 = locationRepository.findById(e1.id)
+            t1.isPresent()
+            t1.get().getCountry() == l1.country
         when: "controller is called with an id"
-        locationController.deleteLocation(e1.id)
+            locationController.deleteLocation(e1.id)
         then:
-        def result = locationRepository.findById(e1.id)
-        !result.isPresent()
+            def result = locationRepository.findById(e1.id)
+            !result.isPresent()
     }
 
     def "Delete by ID - REST"() {
@@ -175,8 +174,8 @@ class LocationControllerSpec extends Specification {
             def result = mockMvc.perform(get("/api/locations/list/summary")).andReturn().response.contentAsString
             def json = new JsonSlurper().parseText(result)
         then: "A list of countries are returned"
-            json[0] == l1.country
-            json[1] == l2.country
+            json[0].country == l1.country
+            json[1].country == l2.country
     }
 
 }

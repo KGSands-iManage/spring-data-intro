@@ -44,16 +44,8 @@ class BookingControllerSpec extends Specification{
     Location l2
     Car car1
     Car car2
-    String car1JsonString
-    String car2JsonString
     Customer cust1
     Customer cust2
-    String cust1JsonString
-    String cust2JsonString
-    Booking b1
-    Booking b2
-    String b1JsonString
-    String b2JsonString
 
     def setup() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
@@ -62,10 +54,7 @@ class BookingControllerSpec extends Specification{
         car1 = new Car(name:'Fast Car', registration:'BA9 4TY', manufacturer:'Ferrari',model:'No Idea', transmission:'AUTOMATIC', category:'A',location:l1)
         car2 = new Car(name:'Slow Car', registration: 'MP9 JS7', manufacturer: "Me", model: 'XD24', transmission: 'MANUAL', category: 'D', location:l2)
         cust1 = new Customer([name:"Jim Bob II"])
-        cust2 = new Customer([name:"What Zit Tooya "])
-        b1 = new Booking(startDate:(new Date("January 1, 2020")), endDate:(new Date("January 2, 2020")), car:car1, customer:cust2)
-        b2 = new Booking(startDate:(new Date("December 12, 2019")), endDate:(new Date("December 13, 2019")), car:car1, customer:cust1)
-        b1JsonString = mapper.writeValueAsString(b1)
+        cust2 = new Customer([name:"What Zit Tooya"])
     }
 
     def "Get by ID - REST"() {
@@ -73,29 +62,36 @@ class BookingControllerSpec extends Specification{
             locationRepository.save(l1)
             carRepository.save(car1)
             customerRepository.save(cust2)
-            def e1 = bookingRepository.save(b1) //.save() is crudRepositroy, which is a parent of the ExampleController.
+            def b1 = new Booking(startDate:(new Date("January 1, 2020")), endDate:(new Date("January 2, 2020")), car:car1, customer:cust2)
+        def e1 = bookingRepository.save(b1) //.save() is crudRepositroy, which is a parent of the ExampleController.
         when: "controller is called with an id"
             def result = mockMvc.perform(get("/api/bookings/$e1.id")).andReturn().response.contentAsString
+            print("\n\n\n\n" + result)
             def json = new JsonSlurper().parseText(result)
         then: "result is an entity with an id"
             json.id == e1.id
             json.id > 0
     }
 
-    //CHECK OVER************************************************
-    //**************************************
-
-    def "Post booking"() {
+    def "Post booking - REST"() {
         when: "booking is added"
-            locationRepository.save(l1)
-            carRepository.save(car1)
-            customerRepository.save(cust2)
-            def result = bookingController.createBooking(b1)
+            def l1_insert = locationRepository.save(l1)
+            def car1_insert = carRepository.save(car1)
+            def cust1_insert = customerRepository.save(cust2)
+            def b1 = new Booking(startDate:(new Date("January 1, 2020")), endDate:(new Date("January 2, 2020")), car:car1, customer:cust2)
+            def b1JsonString = mapper.writeValueAsString(b1)
+
+            def e1 = mockMvc.perform(MockMvcRequestBuilders
+                    .post("/api/bookings").contentType(MediaType.APPLICATION_JSON).content(b1JsonString))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn().response.contentAsString
+            def e1id = new JsonSlurper().parseText(e1)
         then: "check dates match"
-            def check = bookingRepository.findById(result)
-            check.get().getStartDate() == b1.startDate
-            print("\n\n" + b1.startDate + "\n\n")
-            check.get().getEndDate() == b1.endDate
+            def result = mockMvc.perform(get("/api/bookings/$e1id")).andReturn().response.contentAsString
+            def json = new JsonSlurper().parseText(result)
+            json.id == e1id
+        and:
+            json.car.location.id == l1_insert.getId()
     }
 
     def "Get all cars - REST"() {
@@ -106,7 +102,9 @@ class BookingControllerSpec extends Specification{
             carRepository.save(car2)
             customerRepository.save(cust1)
             customerRepository.save(cust2)
-            Booking b3 = new Booking(startDate:(new Date("October 13, 2020")), endDate:(new Date("October 14, 2020")), car:car2, customer:cust1)
+            def b1 = new Booking(startDate:(new Date("January 1, 2020")), endDate:(new Date("January 2, 2020")), car:car1, customer:cust2)
+            def b2 = new Booking(startDate:(new Date("December 12, 2019")), endDate:(new Date("December 13, 2019")), car:car1, customer:cust1)
+            def b3 = new Booking(startDate:(new Date("October 13, 2020")), endDate:(new Date("October 14, 2020")), car:car2, customer:cust1)
             def e1 = bookingRepository.save(b1)
             def e2 = bookingRepository.save(b2)
             def e3 = bookingRepository.save(b3)
@@ -122,6 +120,7 @@ class BookingControllerSpec extends Specification{
             locationRepository.save(l1)
             carRepository.save(car1)
             customerRepository.save(cust2)
+            def b1 = new Booking(startDate:(new Date("January 1, 2020")), endDate:(new Date("January 2, 2020")), car:car1, customer:cust2)
             def e1 = bookingRepository.save(b1)
             def result1 = mockMvc.perform(get("/api/bookings/$e1.id")).andReturn().response.contentAsString
             def json1 = new JsonSlurper().parseText(result1)
@@ -151,21 +150,46 @@ class BookingControllerSpec extends Specification{
             thrown IllegalDateException
     }
 
-    def "Update booking"() {
+    def "Update booking - REST"() {
         given: "Existing entity"
             locationRepository.save(l1)
             carRepository.save(car1)
             customerRepository.save(cust2)
+            def b1 = new Booking(startDate:(new Date("January 1, 2020")), endDate:(new Date("January 2, 2020")), car:car1, customer:cust2)
             def e1 = bookingRepository.save(b1)
-        when:
+        when: "booking is replaced"
             Booking b3 = new Booking(id:1L,startDate:(new Date("January 1, 2020")), endDate:(new Date("January 13, 2020")), car:car1, customer:cust2)
             def e2 = bookingController.createBooking(b3)
-        then:
+        then: "new booking is there"
             def result = bookingController.findBookingById(e1.id)
             result.id == e2
             result.endDate == b3.endDate
         and:
             e1.id == e2
+    }
+
+    def "List of bookings on a day - REST"() {
+        given: "bookings added"
+            locationRepository.save(l1)
+            locationRepository.save(l2)
+            carRepository.save(car1)
+            carRepository.save(car2)
+            customerRepository.save(cust1)
+            customerRepository.save(cust2)
+            def date = "01-01-2020"
+            def b1 = new Booking(startDate:(new Date("January 1, 2020")), endDate:(new Date("January 2, 2020")), car:car2, customer:cust2)
+            def b2 = new Booking(startDate:(new Date("January 1, 2020")), endDate:(new Date("December 13, 2020")), car:car1, customer:cust1)
+            def e1 = bookingRepository.save(b1)
+            def e2 = bookingRepository.save(b2)
+        when: "page is called with sorting of location"
+            def result = mockMvc.perform(get("/api/bookings/search-by-day/$date?page=0&size=1&sort=car.location.country")).andReturn().response.contentAsString
+            def json = new JsonSlurper().parseText(result)
+        then: "2nd booking is first on the first page"
+            json.content[0].id == e2.id
+        and: "country matches"
+            json.content[0].car.location.country == l1.country
+
+
     }
 
 }

@@ -1,8 +1,10 @@
 package com.example.demo.controllers;
 
 import com.example.demo.entities.Car;
+import com.example.demo.entities.Views;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.services.CarService;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +25,13 @@ public class CarController {
         return car.getId();
     }
 
+    @JsonView(Views.CarFull.class)
     @GetMapping
     public Page<Car> listAllCars(Pageable pageable) {
         return carService.listAllCars(pageable);
     }
 
+    @JsonView(Views.CarFull.class)
     @ResponseBody
     @GetMapping("/{id}")
     public Car findCarById(@PathVariable("id") Long id) {
@@ -49,6 +53,7 @@ public class CarController {
         }
     }
 
+    @JsonView(Views.CarFull.class)
     @GetMapping("list-by-location/{id}")
     public List<Car> ListCarsByLocationId(@PathVariable("id") Long locationId) {
         return carService.listCarsByLocationId(locationId);

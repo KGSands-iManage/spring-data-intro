@@ -1,13 +1,13 @@
 package com.example.demo.controllers;
 
 import com.example.demo.entities.Customer;
+import com.example.demo.entities.Views;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.services.CustomerService;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController("/api/customers")
@@ -23,11 +23,13 @@ public class CustomerController {
         return customer.getId();
     }
 
+    @JsonView(Views.CustomerFull.class)
     @GetMapping
     public Page<Customer> listAllCustomers(Pageable pageable) {
         return customerService.listAllCustomers(pageable);
     }
 
+    @JsonView(Views.CustomerFull.class)
     @ResponseBody
     @GetMapping("/{id}")
     public Customer findCustomerById(@PathVariable("id") Long id) {
@@ -48,5 +50,4 @@ public class CustomerController {
             customerService.deleteCustomer(id);
         }
     }
-
 }

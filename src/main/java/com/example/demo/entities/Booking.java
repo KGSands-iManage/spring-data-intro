@@ -2,6 +2,7 @@ package com.example.demo.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,16 +11,18 @@ import java.util.Date;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    @JsonView({Views.BookingFull.class, Views.CustomerFull.class})
+    private Long id;
 
-
+    @JsonView({Views.BookingFull.class, Views.CustomerFull.class})
     @JsonFormat(shape= JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "GMT")
     @Temporal(TemporalType.DATE)
-    public Date startDate;
+    private Date startDate;
 
+    @JsonView({Views.BookingFull.class, Views.CustomerFull.class})
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "GMT")
     @Temporal(TemporalType.DATE)
-    public Date endDate;
+    private Date endDate;
 
     public Long getId() {
         return id;
@@ -33,13 +36,19 @@ public class Booking {
         return endDate;
     }
 
-    @JsonBackReference(value="car")
+    @JsonView(Views.BookingFull.class)
     @ManyToOne(optional = false)
-    Car car;
+    private Car car;
 
-    @JsonBackReference(value="customer")
+    @JsonView(Views.BookingFull.class)
     @ManyToOne(optional = false)
-    Customer customer;
+    private Customer customer;
 
+    public Car getCar() {
+        return car;
+    }
 
+    public Customer getCustomer() {
+        return customer;
+    }
 }

@@ -1,22 +1,18 @@
 package com.example.demo.entities;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @javax.persistence.Entity
-//@NamedEntityGraph(
-//        name = "Location",
-//        attributeNodes = {
-//                @NamedAttributeNode("id"),
-//                @NamedAttributeNode("country")
-//        })
 public class Location {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @JsonView({Views.LocationSummary.class, Views.LocationFull.class, Views.CarFull.class, Views.BookingFull.class})
     private Long id;
 
+    @JsonView({Views.LocationFull.class, Views.LocationSummary.class, Views.CarFull.class, Views.BookingFull.class})
     private String country = "";
 
     public Long getId() {
@@ -35,11 +31,11 @@ public class Location {
         this.country = country;
     }
 
+    @JsonView(Views.LocationFull.class)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    private Set<Car> cars;
+
     public Set<Car> getCars() {
         return cars;
     }
-
-    @JsonManagedReference(value = "location")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
-    Set<Car> cars;
 }

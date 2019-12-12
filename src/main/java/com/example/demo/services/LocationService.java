@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import com.example.demo.entities.Car;
 import com.example.demo.entities.Location;
 import com.example.demo.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class LocationService {
@@ -34,5 +36,4 @@ public class LocationService {
     public List<Location> findAll() {
         return locationRepository.findAll();
     }
-
 }
