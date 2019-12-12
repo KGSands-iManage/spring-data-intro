@@ -1,5 +1,9 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
+
 import javax.persistence.*;
 import java.util.Set;
 
@@ -7,9 +11,11 @@ import java.util.Set;
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    @JsonView({Views.CustomerFull.class, Views.BookingFull.class})
+    private Long id;
 
-    public String name = "";
+    @JsonView({Views.CustomerFull.class, Views.BookingFull.class})
+    private String name = "";
 
     public Long getId() {
         return id;
@@ -19,6 +25,11 @@ public class Customer {
         return name;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parent", fetch = FetchType.EAGER)
-    Set<ChildEntity> children;
+    @JsonView(Views.CustomerFull.class)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer", fetch = FetchType.EAGER)
+    private Set<Booking> bookings;
+
+    public Set<Booking> getBookings() {
+        return bookings;
+    }
 }

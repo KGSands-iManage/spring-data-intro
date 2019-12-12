@@ -1,5 +1,7 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import javax.persistence.*;
 import java.util.Set;
 
@@ -7,8 +9,10 @@ import java.util.Set;
 public class Location {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @JsonView({Views.LocationSummary.class, Views.LocationFull.class, Views.CarFull.class, Views.BookingFull.class})
     private Long id;
 
+    @JsonView({Views.LocationFull.class, Views.LocationSummary.class, Views.CarFull.class, Views.BookingFull.class})
     private String country = "";
 
     public Long getId() {
@@ -27,6 +31,11 @@ public class Location {
         this.country = country;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parent", fetch = FetchType.EAGER)
-    Set<ChildEntity> children;
+    @JsonView(Views.LocationFull.class)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "location", fetch = FetchType.LAZY)
+    private Set<Car> cars;
+
+    public Set<Car> getCars() {
+        return cars;
+    }
 }
